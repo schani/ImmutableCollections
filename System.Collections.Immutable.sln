@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Collections.Immutable", "System.Collections.Immutable\System.Collections.Immutable.csproj", "{024A2111-4B19-44D7-917E-8514CF632469}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{E7523A9A-BF2B-420D-B67F-B73AA98C6061}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{024A2111-4B19-44D7-917E-8514CF632469}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{024A2111-4B19-44D7-917E-8514CF632469}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{024A2111-4B19-44D7-917E-8514CF632469}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{024A2111-4B19-44D7-917E-8514CF632469}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7523A9A-BF2B-420D-B67F-B73AA98C6061}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7523A9A-BF2B-420D-B67F-B73AA98C6061}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7523A9A-BF2B-420D-B67F-B73AA98C6061}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7523A9A-BF2B-420D-B67F-B73AA98C6061}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = System.Collections.Immutable\System.Collections.Immutable.csproj
+	EndGlobalSection
+EndGlobal
