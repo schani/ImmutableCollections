@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace System.Collections.Immutable
 {
@@ -79,10 +80,42 @@ namespace System.Collections.Immutable
 
 		public ImmutableList<T> AddRange (IEnumerable<T> items)
 		{
-			var result = this;
-			foreach (var item in items)
-				result = result.Add (item);
-			return result;
+			// as .Add() is an expensive operation (O(n log n) amortized), we try to avoid using .Add() here.
+			// this implementation enumerates 'items' twice in the worse case scenario, once for the count, and once for the data copy
+			// this avoids in all cases array resizing per element.
+			if(items==null)
+			{
+				throw new ArgumentNullException("items");
+			}
+			int itemsSize = -1;
+			var itemsAsICollectionOfT = items as ICollection<T>;
+			if(itemsAsICollectionOfT==null)
+			{
+				var itemsAsICollection = items as ICollection;
+				if(itemsAsICollection == null)
+				{
+					// No other option, enumerate
+					itemsSize = items.Count();
+				}
+				else
+				{
+					itemsSize = itemsAsICollection.Count;
+				}
+			}
+			else
+			{
+				itemsSize = itemsAsICollectionOfT.Count;
+			}
+			var newItemsToAdd = new T[itemsSize];
+			int index = 0;
+			foreach(var itemToAdd in items)
+			{
+				newItemsToAdd[index++] = itemToAdd;
+			}
+
+			var newItems = GrowIfNeeded(itemsSize);
+			Array.Copy(newItemsToAdd, 0, newItems, count, itemsSize);
+			return new ImmutableList<T>(newItems, count + itemsSize, valueComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.AddRange (IEnumerable<T> items)
