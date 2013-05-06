@@ -26,6 +26,7 @@
 using System;
 using NUnit.Framework;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace UnitTests
 {
@@ -78,6 +79,44 @@ namespace UnitTests
 			Assert.AreEqual (5, list[2]);
 			Assert.AreEqual (6, list[3]);
 			Assert.AreEqual (3, list[4]);
+		}
+
+
+		[Test]
+		public void TestAddRange()
+		{
+			var toAdd = new List<int>() { 1, 2, 3, 4 };
+			var immutable1 = new ImmutableList<int>();
+			var immutable2 = immutable1.AddRange(toAdd);
+			Assert.AreNotEqual(immutable1, immutable2);
+			Assert.AreEqual(4, immutable2.Count);
+			for(int i = 0; i < toAdd.Count; i++)
+			{
+				Assert.AreEqual(toAdd[i], immutable2[i]);
+			}
+		}
+
+
+		[Test]
+		public void TestAddRangeToListCreatedWithAddRange()
+		{
+			var toAdd = new List<int>() { 1, 2, 3, 4 };
+			var immutable1 = new ImmutableList<int>();
+			var immutable2 = immutable1.AddRange(toAdd);
+			Assert.AreNotEqual(immutable1, immutable2);
+			Assert.AreEqual(4, immutable2.Count);
+			for(int i = 0; i < toAdd.Count; i++)
+			{
+				Assert.AreEqual(toAdd[i], immutable2[i]);
+			}
+			var toAdd2 = new List<int> { 5, 6, 7 };
+			var immutable3 = immutable2.AddRange(toAdd2);
+			Assert.AreNotEqual(immutable2, immutable3);
+			Assert.AreEqual(7, immutable3.Count);
+			for(int i = 0; i < toAdd2.Count; i++)
+			{
+				Assert.AreEqual(toAdd2[i], immutable3[4+i]);
+			}
 		}
 	}
 }
