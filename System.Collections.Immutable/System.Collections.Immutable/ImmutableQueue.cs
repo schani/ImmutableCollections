@@ -34,6 +34,12 @@ namespace System.Collections.Immutable
 		readonly ImmutableStack<T> frontStack;
 		readonly ImmutableStack<T> backStack;
 
+		public int Count {
+			get {
+				return frontStack.Count + backStack.Count;
+			}
+		}
+
 		public ImmutableQueue ()
 		{
 			frontStack = backStack = ImmutableStack<T>.Empty;

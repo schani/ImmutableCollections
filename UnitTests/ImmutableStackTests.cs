@@ -54,6 +54,16 @@ namespace UnitTests
 		}
 
 		[Test]
+		public void TestCount ()
+		{
+			var stack = new ImmutableStack<int> ();
+			for (int i = 0; i < 10; i++) {
+				Assert.AreEqual (i, stack.Count);
+				stack = stack.Push (i);
+			}
+		}
+
+		[Test]
 		public void TestPeek ()
 		{
 			IImmutableStack<int> s = new ImmutableStack <int> ();

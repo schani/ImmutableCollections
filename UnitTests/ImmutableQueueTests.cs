@@ -54,6 +54,17 @@ namespace UnitTests
 		}
 
 		[Test]
+		public void TestCount ()
+		{
+			var queue = new ImmutableQueue<int> ();
+			for (int i = 0; i < 10; i++) {
+				Assert.AreEqual (i, queue.Count);
+				queue = queue.Enqueue (i);
+			}
+		}
+
+
+		[Test]
 		public void TestPeek ()
 		{
 			IImmutableQueue<int> s = new ImmutableQueue<int> ();
