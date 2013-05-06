@@ -51,7 +51,12 @@ namespace System.Collections.Immutable
 			get { return tail == null; }
 		}
 
-		public IImmutableStack<T> Clear ()
+		public ImmutableStack<T> Clear ()
+		{
+			return Empty;
+		}
+
+		IImmutableStack<T> IImmutableStack<T>.Clear ()
 		{
 			return Empty;
 		}
@@ -63,16 +68,26 @@ namespace System.Collections.Immutable
 			return head;
 		}
 
-		public IImmutableStack<T> Pop ()
+		public ImmutableStack<T> Pop ()
 		{
 			if (IsEmpty)
 				throw new InvalidOperationException ("Stack is empty.");
 			return tail;
 		}
 
-		public IImmutableStack<T> Push (T value)
+		IImmutableStack<T> IImmutableStack<T>.Pop ()
+		{
+			return Pop ();
+		}
+
+		public ImmutableStack<T> Push (T value)
 		{
 			return new ImmutableStack<T> (value, this);
+		}
+
+		IImmutableStack<T> IImmutableStack<T>.Push (T value)
+		{
+			return Push (value);
 		}
 
 		#endregion

@@ -64,7 +64,7 @@ namespace System.Collections.Immutable
 			return result;
 		}
 
-		public IImmutableList<T> Add (T value)
+		public ImmutableList<T> Add (T value)
 		{
 			var newItems = GrowIfNeeded (1);
 			int newSize  = count;
@@ -72,17 +72,33 @@ namespace System.Collections.Immutable
 			return new ImmutableList<T> (newItems, newSize, valueComparer);
 		}
 
-		public IImmutableList<T> AddRange (IEnumerable<T> items)
+		IImmutableList<T> IImmutableList<T>.Add (T value)
 		{
-			IImmutableList<T> result = this;
+			return Add (value);
+		}
+
+		public ImmutableList<T> AddRange (IEnumerable<T> items)
+		{
+			var result = this;
 			foreach (var item in items)
 				result = result.Add (item);
 			return result;
 		}
 
-		public IImmutableList<T> Clear ()
+		IImmutableList<T> IImmutableList<T>.AddRange (IEnumerable<T> items)
+		{
+			return AddRange (items);
+		}
+
+
+		public ImmutableList<T> Clear ()
 		{
 			return Empty;
+		}
+
+		IImmutableList<T> IImmutableList<T>.Clear ()
+		{
+			return Clear ();
 		}
 
 		public bool Contains (T value)
@@ -99,7 +115,7 @@ namespace System.Collections.Immutable
 			return -1;
 		}
 
-		public IImmutableList<T> Insert (int index, T element)
+		public ImmutableList<T> Insert (int index, T element)
 		{
 			if (index >= count)
 				throw new ArgumentOutOfRangeException ("index");
@@ -113,7 +129,12 @@ namespace System.Collections.Immutable
 			return new ImmutableList<T> (newItems, this.count + 1, valueComparer);
 		}
 
-		IImmutableList<T> InsertCollection (int index, ICollection<T> collection)
+		IImmutableList<T> IImmutableList<T>.Insert (int index, T element)
+		{
+			return Insert (index, element);
+		}
+
+		ImmutableList<T> InsertCollection (int index, ICollection<T> collection)
 		{
 			if (index >= count)
 				throw new ArgumentOutOfRangeException ("index");
@@ -127,19 +148,24 @@ namespace System.Collections.Immutable
 			return new ImmutableList<T> (newItems, this.count + collection.Count, valueComparer);
 		}
 
-		public IImmutableList<T> InsertRange (int index, IEnumerable<T> items)
+		public ImmutableList<T> InsertRange (int index, IEnumerable<T> items)
 		{
 			var collection = items as ICollection<T>;
 			if (collection != null) 
 				return InsertCollection (index, collection);
 
-			IImmutableList<T> result = this;
+			var result = this;
 			foreach (T t in items)
 				result = result.Insert (index++, t);		
 			return result;
 		}
 
-		public IImmutableList<T> Remove (T value)
+		IImmutableList<T> IImmutableList<T>.InsertRange (int index, IEnumerable<T> items)
+		{
+			return InsertRange (index, items);
+		}
+
+		public ImmutableList<T> Remove (T value)
 		{
 			int loc = IndexOf (value);
 			if (loc != -1)
@@ -148,11 +174,16 @@ namespace System.Collections.Immutable
 			return this;
 		}
 
-		public IImmutableList<T> RemoveAll (Predicate<T> match)
+		IImmutableList<T> IImmutableList<T>.Remove (T value)
+		{
+			return Remove (value);
+		}
+
+		public ImmutableList<T> RemoveAll (Predicate<T> match)
 		{
 			if (match == null)
 				throw new ArgumentNullException ("match");
-			IImmutableList<T> result = this;
+			var result = this;
 			for (int i = 0; i < result.Count; i++) {
 				if (match(result[i])) {
 					result = result.RemoveAt (i);
@@ -163,9 +194,19 @@ namespace System.Collections.Immutable
 			return result;
 		}
 
-		public IImmutableList<T> RemoveAt (int index)
+		IImmutableList<T> IImmutableList<T>.RemoveAll (Predicate<T> match)
+		{
+			return RemoveAll (match);
+		}
+
+		public ImmutableList<T> RemoveAt (int index)
 		{
 			return RemoveRange (index, 1);
+		}
+
+		IImmutableList<T> IImmutableList<T>.RemoveAt (int index)
+		{
+			return RemoveAt (index);
 		}
 
 		void CheckRange (int idx, int count)
@@ -180,7 +221,7 @@ namespace System.Collections.Immutable
 				throw new ArgumentException ("index and count exceed length of list");
 		}
 
-		public IImmutableList<T> RemoveRange (int index, int count)
+		public ImmutableList<T> RemoveRange (int index, int count)
 		{
 			CheckRange (index, count);
 			int capacity = Math.Max (Math.Max (items.Length * 2, DefaultCapacity), items.Length);
@@ -190,24 +231,40 @@ namespace System.Collections.Immutable
 			return new ImmutableList<T> (newItems, this.count - count, valueComparer);
 		}
 
-		public IImmutableList<T> RemoveRange (IEnumerable<T> items)
+		IImmutableList<T> IImmutableList<T>.RemoveRange (int index, int count)
 		{
-			IImmutableList<T> result = this;
+			return RemoveRange (index, count);
+		}
+
+		public ImmutableList<T> RemoveRange (IEnumerable<T> items)
+		{
+			var result = this;
 			foreach (var item in items) {
 				result = result.Remove (item);
 			}
 			return result;
 		}
 
-		public IImmutableList<T> Replace (T oldValue, T newValue)
+		IImmutableList<T> IImmutableList<T>.RemoveRange (IEnumerable<T> items)
+		{
+			return RemoveRange (items);
+		}
+
+		public ImmutableList<T> Replace (T oldValue, T newValue)
 		{
 			var idx = IndexOf (oldValue);
 			if (idx < 0)
 				return this;
 			return SetItem (idx, newValue);
 		}
+		
+		IImmutableList<T> IImmutableList<T>.Replace (T oldValue, T newValue)
+		{
+			return Replace (oldValue, newValue);
+		}
 
-		public IImmutableList<T> SetItem (int index, T value)
+
+		public ImmutableList<T> SetItem (int index, T value)
 		{
 			if (index > count)
 				throw new ArgumentOutOfRangeException ("index");
@@ -217,9 +274,19 @@ namespace System.Collections.Immutable
 			return new ImmutableList<T> (newItems, count, valueComparer);
 		}
 
-		public IImmutableList<T> WithComparer (IEqualityComparer<T> equalityComparer)
+		IImmutableList<T> IImmutableList<T>.SetItem (int index, T value)
+		{
+			return SetItem (index, value);
+		}
+
+		public ImmutableList<T> WithComparer (IEqualityComparer<T> equalityComparer)
 		{
 			return new ImmutableList<T> (items, count, equalityComparer);
+		}
+
+		IImmutableList<T> IImmutableList<T>.WithComparer (IEqualityComparer<T> equalityComparer)
+		{
+			return WithComparer (equalityComparer);
 		}
 
 		public IEqualityComparer<T> ValueComparer {

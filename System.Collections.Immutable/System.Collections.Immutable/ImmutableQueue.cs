@@ -31,15 +31,15 @@ namespace System.Collections.Immutable
 {
 	public class ImmutableQueue<T> : IImmutableQueue<T>
 	{
-		readonly IImmutableStack<T> frontStack;
-		readonly IImmutableStack<T> backStack;
+		readonly ImmutableStack<T> frontStack;
+		readonly ImmutableStack<T> backStack;
 
 		public ImmutableQueue ()
 		{
 			frontStack = backStack = ImmutableStack<T>.Empty;
 		}
 
-		ImmutableQueue (IImmutableStack<T> frontStack, IImmutableStack<T> backStack)
+		ImmutableQueue (ImmutableStack<T> frontStack, ImmutableStack<T> backStack)
 		{
 			if (frontStack == null)
 				throw new ArgumentNullException ("frontStack");
@@ -59,12 +59,17 @@ namespace System.Collections.Immutable
 			}
 		}
 
-		public IImmutableQueue<T> Clear ()
+		public ImmutableQueue<T> Clear ()
 		{
 			return Empty;
 		}
 
-		public IImmutableQueue<T> Dequeue ()
+		IImmutableQueue<T> IImmutableQueue<T>.Clear ()
+		{
+			return Empty;
+		}
+
+		public ImmutableQueue<T> Dequeue ()
 		{
 			if (IsEmpty)
 				throw new InvalidOperationException ("Queue is empty.");
@@ -74,9 +79,14 @@ namespace System.Collections.Immutable
 			return new ImmutableQueue<T> (Reverse (backStack), ImmutableStack<T>.Empty);
 		}
 
-		static IImmutableStack<T> Reverse (IImmutableStack<T> stack)
+		IImmutableQueue<T> IImmutableQueue<T>.Dequeue ()
 		{
-			IImmutableStack<T> result = ImmutableStack<T>.Empty;
+			return Dequeue ();
+		}
+
+		static ImmutableStack<T> Reverse (IImmutableStack<T> stack)
+		{
+			var result = ImmutableStack<T>.Empty;
 			var cur = stack;
 			while (!cur.IsEmpty) {
 				result = result.Push (cur.Peek ());
@@ -85,12 +95,17 @@ namespace System.Collections.Immutable
 			return result;
 		}
 
-		public IImmutableQueue<T> Enqueue (T value)
+		public ImmutableQueue<T> Enqueue (T value)
 		{
 			if (IsEmpty)
 				return new ImmutableQueue<T> (ImmutableStack<T>.Empty.Push (value), ImmutableStack<T>.Empty);
 
 			return new ImmutableQueue<T> (frontStack, backStack.Push (value));
+		}
+
+		IImmutableQueue<T> IImmutableQueue<T>.Enqueue (T value)
+		{
+			return Enqueue (value);
 		}
 
 		public T Peek ()
