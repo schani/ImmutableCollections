@@ -40,7 +40,7 @@ namespace System.Collections.Immutable
 			}
 		}
 
-		public ImmutableQueue ()
+		internal ImmutableQueue ()
 		{
 			frontStack = backStack = ImmutableStack<T>.Empty;
 		}
@@ -57,7 +57,7 @@ namespace System.Collections.Immutable
 		}
 		
 		#region IImmutableQueue implementation
-		public static readonly ImmutableQueue<T> Empty = new ImmutableQueue<T> (ImmutableStack<T>.Empty, ImmutableStack<T>.Empty);
+		internal static readonly ImmutableQueue<T> Empty = new ImmutableQueue<T> (ImmutableStack<T>.Empty, ImmutableStack<T>.Empty);
 
 		public bool IsEmpty {
 			get {
@@ -85,11 +85,17 @@ namespace System.Collections.Immutable
 			return new ImmutableQueue<T> (Reverse (backStack), ImmutableStack<T>.Empty);
 		}
 
+		public ImmutableQueue<T> Dequeue (out T value)
+		{
+			value = Peek ();
+			return Dequeue ();
+		}
+
 		IImmutableQueue<T> IImmutableQueue<T>.Dequeue ()
 		{
 			return Dequeue ();
 		}
-
+		
 		static ImmutableStack<T> Reverse (IImmutableStack<T> stack)
 		{
 			var result = ImmutableStack<T>.Empty;
@@ -202,6 +208,40 @@ namespace System.Collections.Immutable
 		}
 
 		#endregion
+	}
+
+	public static class ImmutableQueue
+	{
+		public static ImmutableQueue<T> Create<T> ()
+		{
+			return ImmutableQueue<T>.Empty;
+		}
+
+		public static ImmutableQueue<T> Create<T> (T item)
+		{
+			return Create<T> ().Enqueue (item);
+		}
+
+		public static ImmutableQueue<T> Create<T> (IEnumerable<T> items)
+		{
+			var result = ImmutableQueue<T>.Empty;
+			foreach (var item in items)
+				result = result.Enqueue (item);
+			return result;
+		}
+
+		public static ImmutableQueue<T> Create<T> (params T[] items)
+		{
+			return Create ((IEnumerable<T>)items);
+		}
+
+		public static IImmutableQueue<T> Dequeue<T> (this IImmutableQueue<T> queue, out T value)
+		{
+			if (queue == null)
+				throw new ArgumentNullException ("queue");
+			value = queue.Peek ();
+			return queue.Dequeue ();
+		}
 	}
 }
 

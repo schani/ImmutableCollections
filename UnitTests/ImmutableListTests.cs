@@ -36,7 +36,7 @@ namespace UnitTests
 		[Test]
 		public void TestSimpleOperation ()
 		{
-			IImmutableList<int> list = new ImmutableList<int> ();
+			var list = ImmutableList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (2);
 			list = list.Add (3);
@@ -56,7 +56,7 @@ namespace UnitTests
 		[Test]
 		public void TestInsert ()
 		{
-			IImmutableList<int> list = new ImmutableList<int> ();
+			var list = ImmutableList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (3);
 			list = list.Insert (1, 2);
@@ -69,7 +69,7 @@ namespace UnitTests
 		[Test]
 		public void TestInsertCollection ()
 		{
-			IImmutableList<int> list = new ImmutableList<int> ();
+			var list = ImmutableList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (3);
 			list = list.InsertRange (1, new [] {4, 5, 6});
@@ -86,7 +86,7 @@ namespace UnitTests
 		public void TestAddRange()
 		{
 			var toAdd = new List<int>() { 1, 2, 3, 4 };
-			var immutable1 = new ImmutableList<int>();
+			var immutable1 = ImmutableList.Create<int> ();
 			var immutable2 = immutable1.AddRange(toAdd);
 			Assert.AreNotEqual(immutable1, immutable2);
 			Assert.AreEqual(4, immutable2.Count);
@@ -101,7 +101,7 @@ namespace UnitTests
 		public void TestAddRangeToListCreatedWithAddRange()
 		{
 			var toAdd = new List<int>() { 1, 2, 3, 4 };
-			var immutable1 = new ImmutableList<int>();
+			var immutable1 = ImmutableList.Create<int> ();
 			var immutable2 = immutable1.AddRange(toAdd);
 			Assert.AreNotEqual(immutable1, immutable2);
 			Assert.AreEqual(4, immutable2.Count);

@@ -35,7 +35,7 @@ namespace UnitTests
 		[Test]
 		public void TestSimpleOperation ()
 		{
-			IImmutableQueue<int> queue = new ImmutableQueue<int> ();
+			var queue = ImmutableQueue.Create<int> ();
 			queue = queue.Enqueue (1);
 			queue = queue.Enqueue (2);
 			queue = queue.Enqueue (3);
@@ -56,7 +56,7 @@ namespace UnitTests
 		[Test]
 		public void TestCount ()
 		{
-			var queue = new ImmutableQueue<int> ();
+			var queue = ImmutableQueue.Create<int> ();
 			for (int i = 0; i < 10; i++) {
 				Assert.AreEqual (i, queue.Count);
 				queue = queue.Enqueue (i);
@@ -67,7 +67,7 @@ namespace UnitTests
 		[Test]
 		public void TestPeek ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 			s = s.Enqueue (1);
 
 			Assert.AreEqual (1, s.Peek (), "#1");
@@ -77,7 +77,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPeekEx ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 			s.Peek ();
 		}
 
@@ -85,7 +85,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPeekEx2 ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 			s = s.Enqueue (1);
 			s = s.Dequeue ();
 			s.Peek ();
@@ -95,7 +95,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestDequeueEx ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 			s.Dequeue ();
 		}
 
@@ -103,7 +103,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestDequeueEx2 ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 			s = s.Enqueue (1);
 			s = s.Dequeue ();
 			s.Dequeue ();
@@ -112,7 +112,7 @@ namespace UnitTests
 		[Test]
 		public void TestEnumerator ()
 		{
-			IImmutableQueue<int> s = new ImmutableQueue<int> ();
+			var s = ImmutableQueue.Create<int> ();
 
 			foreach (int x in s)
 				Assert.Fail ("#1" + x);

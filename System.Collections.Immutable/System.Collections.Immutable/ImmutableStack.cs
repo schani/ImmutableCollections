@@ -41,7 +41,7 @@ namespace System.Collections.Immutable
 			}
 		}
 
-		public ImmutableStack ()
+		internal ImmutableStack ()
 		{
 		}
 
@@ -53,7 +53,7 @@ namespace System.Collections.Immutable
 		}
 
 		#region IImmutableStack implementation
-		public static readonly ImmutableStack<T> Empty = new ImmutableStack<T> ();
+		internal static readonly ImmutableStack<T> Empty = new ImmutableStack<T> ();
 
 		public bool IsEmpty {
 			get { return tail == null; }
@@ -81,6 +81,12 @@ namespace System.Collections.Immutable
 			if (IsEmpty)
 				throw new InvalidOperationException ("Stack is empty.");
 			return tail;
+		}
+
+		public ImmutableStack<T> Pop (out T value)
+		{
+			value = Peek ();
+			return Pop ();
 		}
 
 		IImmutableStack<T> IImmutableStack<T>.Pop ()
@@ -169,4 +175,39 @@ namespace System.Collections.Immutable
 
 		#endregion
 	}
+
+	public static class ImmutableStack
+	{
+		public static ImmutableStack<T> Create<T> ()
+		{
+			return ImmutableStack<T>.Empty;
+		}
+
+		public static ImmutableStack<T> Create<T> (T item)
+		{
+			return Create<T> ().Push (item);
+		}
+
+		public static ImmutableStack<T> Create<T> (IEnumerable<T> items)
+		{
+			var result = ImmutableStack<T>.Empty;
+			foreach (var item in items)
+				result = result.Push (item);
+			return result;
+		}
+
+		public static ImmutableStack<T> Create<T> (params T[] items)
+		{
+			return Create ((IEnumerable<T>)items);
+		}
+
+		public static IImmutableStack<T> Pop<T> (this IImmutableStack<T> stack, out T value)
+		{
+			if (stack == null)
+				throw new ArgumentNullException ("stack");
+			value = stack.Peek ();
+			return stack.Pop ();
+		}
+	}
+
 }

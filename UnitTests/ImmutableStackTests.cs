@@ -35,7 +35,7 @@ namespace UnitTests
 		[Test]
 		public void TestSimpleOperation ()
 		{
-			IImmutableStack<int> stack = new ImmutableStack<int> ();
+			var stack = ImmutableStack.Create<int> ();
 			stack = stack.Push (1);
 			stack = stack.Push (2);
 			stack = stack.Push (3);
@@ -56,7 +56,7 @@ namespace UnitTests
 		[Test]
 		public void TestCount ()
 		{
-			var stack = new ImmutableStack<int> ();
+			var stack = ImmutableStack.Create<int> ();
 			for (int i = 0; i < 10; i++) {
 				Assert.AreEqual (i, stack.Count);
 				stack = stack.Push (i);
@@ -66,7 +66,7 @@ namespace UnitTests
 		[Test]
 		public void TestPeek ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 			s = s.Push (1);
 
 			Assert.AreEqual (1, s.Peek (), "#1");
@@ -80,7 +80,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPeekEx ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 			s.Peek ();
 		}
 
@@ -88,7 +88,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPeekEx2 ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 			s = s.Push (1);
 			s = s.Pop ();
 			s.Peek ();
@@ -98,7 +98,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPopEx ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 			s.Pop ();
 		}
 
@@ -106,7 +106,7 @@ namespace UnitTests
 		[ExpectedException (typeof (InvalidOperationException))]
 		public void TestPopEx2 ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 			s = s.Push (1);
 			s = s.Pop ();
 			s.Pop ();
@@ -115,7 +115,7 @@ namespace UnitTests
 		[Test]
 		public void TestEnumerator ()
 		{
-			IImmutableStack<int> s = new ImmutableStack <int> ();
+			var s = ImmutableStack.Create<int> ();
 
 			foreach (int x in s)
 				Assert.Fail ("#1:" + x);

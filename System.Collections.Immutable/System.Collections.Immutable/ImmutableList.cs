@@ -33,19 +33,24 @@ namespace System.Collections.Immutable
 	{
 		const int DefaultCapacity = 4;
 
-		public static readonly ImmutableList<T> Empty = new ImmutableList<T> ();
+		internal static readonly ImmutableList<T> Empty = new ImmutableList<T> ();
 
 		readonly T[] items;
 		readonly int count;
 		readonly IEqualityComparer<T> valueComparer;
 
+		public ImmutableList (IEqualityComparer<T> equalityComparer)
+		{
+			this.valueComparer = EqualityComparer<T>.Default;
+			this.items = new T[DefaultCapacity];
+		}
 		public ImmutableList ()
 		{
 			this.valueComparer = EqualityComparer<T>.Default;
 			this.items = new T[DefaultCapacity];
 		}
 
-		ImmutableList (T[] items, int count, IEqualityComparer<T> equalityComparer)
+		internal ImmutableList (T[] items, int count, IEqualityComparer<T> equalityComparer)
 		{
 			this.items = items;
 			this.count = count;
@@ -370,6 +375,63 @@ namespace System.Collections.Immutable
 		}
 
 		#endregion
+	}
+
+	public static class ImmutableList
+	{
+		public static ImmutableList<T> Create<T> ()
+		{
+			return ImmutableList<T>.Empty;
+		}
+
+		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer, params T[] items)
+		{
+			return new ImmutableList<T> (items, items.Length, equalityComparer);
+		}
+
+		public static ImmutableList<T> Create<T> (params T[] items)
+		{
+			return Create (EqualityComparer<T>.Default, items);
+		}
+
+		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer, IEnumerable<T> items)
+		{
+			return Create (equalityComparer, items.ToArray ());
+		}
+
+		public static ImmutableList<T> Create<T> (IEnumerable<T> items)
+		{
+			return Create (items.ToArray ());
+		}
+		
+		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer, T item)
+		{
+			return new ImmutableList<T> (new T[] { item, default(T), default(T), default(T) }, 1, equalityComparer);;
+		}
+
+		public static ImmutableList<T> Create<T> (T item)
+		{
+			return Create (EqualityComparer<T>.Default, item);
+		}
+
+		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer)
+		{
+			return Create<T> ().WithComparer (equalityComparer);
+		}
+
+		public static ImmutableList<T> ToImmutableList<T> (this IEnumerable<T> source)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			return Create<T> ().AddRange (source);
+		}
+
+		public static ImmutableList<T> ToImmutableList<T> (this IEnumerable<T> source, IEqualityComparer<T> equalityComparer)
+		{
+			if (source == null)
+				throw new ArgumentNullException ("source");
+			return Create<T> ().WithComparer (equalityComparer).AddRange (source);
+		}
 	}
 }
 

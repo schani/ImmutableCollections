@@ -35,7 +35,7 @@ namespace UnitTests
 		[Test]
 		public void TestSimpleOperation ()
 		{
-			IImmutableDictionary<string, string>  dict = new ImmutableDictionary<string, string> ();
+			var  dict = ImmutableDictionary.Create<string, string> ();
 			Assert.AreEqual (0, dict.Count);
 
 			dict = dict.Add ("Hello", "World");
