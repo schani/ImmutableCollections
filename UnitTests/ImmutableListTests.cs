@@ -118,6 +118,26 @@ namespace UnitTests
 				Assert.AreEqual(toAdd2[i], immutable3[4+i]);
 			}
 		}
+
+		[Test]
+		public void TestFork()
+		{
+			var immutableBase = ImmutableList.Create<int>(1);
+
+			var fork1 = immutableBase.Add(2);
+			var fork2 = immutableBase.Add(3);
+
+			Assert.AreEqual(immutableBase.Count, 1);
+			Assert.AreEqual(immutableBase[0], 1);
+
+			Assert.AreEqual(fork1.Count, 2);
+			Assert.AreEqual(fork1[0], 1);
+			Assert.AreEqual(fork1[1], 2);
+
+			Assert.AreEqual(fork2.Count, 2);
+			Assert.AreEqual(fork2[0], 1);
+			Assert.AreEqual(fork2[1], 3);
+		}
 	}
 }
 
