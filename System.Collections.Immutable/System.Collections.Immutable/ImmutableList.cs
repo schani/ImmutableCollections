@@ -39,12 +39,7 @@ namespace System.Collections.Immutable
 		readonly int count;
 		readonly IEqualityComparer<T> valueComparer;
 
-		public ImmutableList (IEqualityComparer<T> equalityComparer)
-		{
-			this.valueComparer = EqualityComparer<T>.Default;
-			this.items = new T[DefaultCapacity];
-		}
-		public ImmutableList ()
+		internal ImmutableList ()
 		{
 			this.valueComparer = EqualityComparer<T>.Default;
 			this.items = new T[DefaultCapacity];
