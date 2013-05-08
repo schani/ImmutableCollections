@@ -41,9 +41,11 @@
     <Compile Include="System.Collections.Immutable\IImmutableStack.cs" />
     <Compile Include="System.Collections.Immutable\ImmutableQueue.cs" />
     <Compile Include="System.Collections.Immutable\ImmutableStack.cs" />
-    <Compile Include="System.Collections.Immutable\ImmutableList.cs" />
     <Compile Include="System.Collections.Immutable\ImmutableDictionary.cs" />
     <Compile Include="System.Collections.Immutable\IImmutableDictionary.cs" />
+    <Compile Include="System.Collections.Immutable\ImmutableArrayList.cs" />
+    <Compile Include="System.Collections.Immutable\ImmutableList.cs" />
+    <Compile Include="System.Collections.Immutable\AvlNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
