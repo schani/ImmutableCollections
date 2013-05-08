@@ -123,7 +123,7 @@ namespace System.Collections.Immutable
 
 		public bool Contains (KeyValuePair<TKey, TValue> kv)
 		{
-			var node = root.GetKey (kv, CompareKV);
+			var node = root.SearchNode (kv, CompareKV);
 			return !node.IsEmpty && valueComparer.Equals (node.Value.Value, kv.Value);
 		}
 
@@ -199,12 +199,12 @@ namespace System.Collections.Immutable
 
 		public bool ContainsKey (TKey key)
 		{
-			return !root.GetKey (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV).IsEmpty;
+			return !root.SearchNode (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV).IsEmpty;
 		}
 
 		public bool TryGetValue (TKey key, out TValue value)
 		{
-			var node = root.GetKey (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV);
+			var node = root.SearchNode (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV);
 			if (node.IsEmpty) {
 				value = default (TValue);
 				return false;
@@ -215,7 +215,7 @@ namespace System.Collections.Immutable
 
 		public TValue this [TKey key] {
 			get {
-				var node = root.GetKey (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV);
+				var node = root.SearchNode (new KeyValuePair<TKey, TValue> (key, default(TValue)), CompareKV);
 				if (!node.IsEmpty)
 					return node.Value.Value;
 				throw new KeyNotFoundException (String.Format ("Key: {0}", key));

@@ -166,7 +166,7 @@ namespace System.Collections.Immutable
 			throw new Exception (String.Format ("Tree too out of balance: {0}", Balance));
 		}
 
-		public AvlNode<T> GetKey (T value, Comparison<T> comparer)
+		public AvlNode<T> SearchNode (T value, Comparison<T> comparer)
 		{
 			var dict = this;
 			while (dict != Empty) {
