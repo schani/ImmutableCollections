@@ -38,6 +38,7 @@
     <Compile Include="ImmutableQueueTests.cs" />
     <Compile Include="ImmutableDictionaryTests.cs" />
     <Compile Include="ImmutableArrayListTests.cs" />
+    <Compile Include="ImmutableListTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
