@@ -31,12 +31,12 @@ using System.Collections.Generic;
 namespace UnitTests
 {
 	[TestFixture]
-	public class ImmutableListTests
+	public class ImmutableArrayListTests
 	{
 		[Test]
 		public void TestSimpleOperation ()
 		{
-			var list = ImmutableList.Create<int> ();
+			var list = ImmutableArrayList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (2);
 			list = list.Add (3);
@@ -56,7 +56,7 @@ namespace UnitTests
 		[Test]
 		public void TestFork ()
 		{
-			var list = ImmutableList.Create<int> ();
+			var list = ImmutableArrayList.Create<int> ();
 			list = list.Add (1);
 			var list2 = list.Add (2);
 			var list3 = list.Add (3);
@@ -71,7 +71,7 @@ namespace UnitTests
 		[Test]
 		public void TestInsert ()
 		{
-			var list = ImmutableList.Create<int> ();
+			var list = ImmutableArrayList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (3);
 			list = list.Insert (1, 2);
@@ -84,7 +84,7 @@ namespace UnitTests
 		[Test]
 		public void TestInsertCollection ()
 		{
-			var list = ImmutableList.Create<int> ();
+			var list = ImmutableArrayList.Create<int> ();
 			list = list.Add (1);
 			list = list.Add (3);
 			list = list.InsertRange (1, new [] {4, 5, 6});
@@ -101,7 +101,7 @@ namespace UnitTests
 		public void TestAddRange()
 		{
 			var toAdd = new List<int>() { 1, 2, 3, 4 };
-			var immutable1 = ImmutableList.Create<int> ();
+			var immutable1 = ImmutableArrayList.Create<int> ();
 			var immutable2 = immutable1.AddRange(toAdd);
 			Assert.AreNotEqual(immutable1, immutable2);
 			Assert.AreEqual(4, immutable2.Count);
@@ -116,7 +116,7 @@ namespace UnitTests
 		public void TestAddRangeToListCreatedWithAddRange()
 		{
 			var toAdd = new List<int>() { 1, 2, 3, 4 };
-			var immutable1 = ImmutableList.Create<int> ();
+			var immutable1 = ImmutableArrayList.Create<int> ();
 			var immutable2 = immutable1.AddRange(toAdd);
 			Assert.AreNotEqual(immutable1, immutable2);
 			Assert.AreEqual(4, immutable2.Count);
@@ -137,7 +137,7 @@ namespace UnitTests
 		[Test]
 		public void TestFork2()
 		{
-			var immutableBase = ImmutableList.Create<int>(1);
+			var immutableBase = ImmutableArrayList.Create<int>(1);
 
 			var fork1 = immutableBase.Add(2);
 			var fork2 = immutableBase.Add(3);
