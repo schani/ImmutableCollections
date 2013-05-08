@@ -31,46 +31,36 @@ namespace System.Collections.Immutable
 {
 	public class ImmutableList<T> : IImmutableList<T>
 	{
-		const int DefaultCapacity = 4;
-
 		internal static readonly ImmutableList<T> Empty = new ImmutableList<T> ();
 
 		readonly T[] items;
-		readonly int count;
 		readonly IEqualityComparer<T> valueComparer;
 
 		internal ImmutableList ()
 		{
 			this.valueComparer = EqualityComparer<T>.Default;
-			this.items = new T[DefaultCapacity];
+			this.items = new T[0];
 		}
 
-		internal ImmutableList (T[] items, int count, IEqualityComparer<T> equalityComparer)
+		internal ImmutableList (T[] items, IEqualityComparer<T> equalityComparer)
 		{
 			this.items = items;
-			this.count = count;
 			this.valueComparer = equalityComparer;
 		}
 
 		#region IImmutableList implementation
 		T[] GrowIfNeeded (int newCount)
 		{
-			var result = items;
-			int minimumSize = count + newCount;
-			if (minimumSize > result.Length) {
-				int capacity = Math.Max (Math.Max (items.Length * 2, DefaultCapacity), minimumSize);
-				result = new T[capacity];
-				Array.Copy (items, result, count);
-			}
+			var result = new T[items.Length + newCount];
+			Array.Copy (items, result, items.Length);
 			return result;
 		}
 
 		public ImmutableList<T> Add (T value)
 		{
 			var newItems = GrowIfNeeded (1);
-			int newSize  = count;
-			newItems [newSize++] = value;
-			return new ImmutableList<T> (newItems, newSize, valueComparer);
+			newItems [items.Length] = value;
+			return new ImmutableList<T> (newItems, valueComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.Add (T value)
@@ -80,42 +70,7 @@ namespace System.Collections.Immutable
 
 		public ImmutableList<T> AddRange (IEnumerable<T> items)
 		{
-			// as .Add() is an expensive operation (O(n log n) amortized), we try to avoid using .Add() here.
-			// this implementation enumerates 'items' twice in the worse case scenario, once for the count, and once for the data copy
-			// this avoids in all cases array resizing per element.
-			if(items==null)
-			{
-				throw new ArgumentNullException("items");
-			}
-			int itemsSize = -1;
-			var itemsAsICollectionOfT = items as ICollection<T>;
-			if(itemsAsICollectionOfT==null)
-			{
-				var itemsAsICollection = items as ICollection;
-				if(itemsAsICollection == null)
-				{
-					// No other option, enumerate
-					itemsSize = items.Count();
-				}
-				else
-				{
-					itemsSize = itemsAsICollection.Count;
-				}
-			}
-			else
-			{
-				itemsSize = itemsAsICollectionOfT.Count;
-			}
-			var newItemsToAdd = new T[itemsSize];
-			int index = 0;
-			foreach(var itemToAdd in items)
-			{
-				newItemsToAdd[index++] = itemToAdd;
-			}
-
-			var newItems = GrowIfNeeded(itemsSize);
-			Array.Copy(newItemsToAdd, 0, newItems, count, itemsSize);
-			return new ImmutableList<T>(newItems, count + itemsSize, valueComparer);
+			return InsertRange (this.items.Length, items);
 		}
 
 		IImmutableList<T> IImmutableList<T>.AddRange (IEnumerable<T> items)
@@ -141,7 +96,7 @@ namespace System.Collections.Immutable
 
 		public int IndexOf (T value)
 		{
-			for (int i = 0; i < count; i++) {
+			for (int i = 0; i < items.Length; i++) {
 				if (valueComparer.Equals (value, items [i]))
 					return i;
 			}
@@ -150,16 +105,15 @@ namespace System.Collections.Immutable
 
 		public ImmutableList<T> Insert (int index, T element)
 		{
-			if (index >= count)
+			if (index >= items.Length)
 				throw new ArgumentOutOfRangeException ("index");
 
-			int capacity = Math.Max (Math.Max (items.Length * 2, DefaultCapacity), items.Length + 1);
-			var newItems = new T[capacity];
+			var newItems = new T[items.Length + 1];
 
 			Array.Copy (items, newItems, index);
-			Array.Copy (items, index, newItems, index + 1, this.count - index);
+			Array.Copy (items, index, newItems, index + 1, this.items.Length - index);
 			newItems [index] = element;
-			return new ImmutableList<T> (newItems, this.count + 1, valueComparer);
+			return new ImmutableList<T> (newItems, valueComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.Insert (int index, T element)
@@ -169,16 +123,14 @@ namespace System.Collections.Immutable
 
 		ImmutableList<T> InsertCollection (int index, ICollection<T> collection)
 		{
-			if (index >= count)
+			if (index > items.Length)
 				throw new ArgumentOutOfRangeException ("index");
 
-			int capacity = Math.Max (Math.Max (items.Length * 2, DefaultCapacity), items.Length + collection.Count);
-			var newItems = new T[capacity];
-
+			var newItems = new T[items.Length + collection.Count];
 			Array.Copy (items, newItems, index);
-			Array.Copy (items, index, newItems, index + collection.Count, this.count - index);
+			Array.Copy (items, index, newItems, index + collection.Count, this.items.Length - index);
 			collection.CopyTo (newItems, index);
-			return new ImmutableList<T> (newItems, this.count + collection.Count, valueComparer);
+			return new ImmutableList<T> (newItems, valueComparer);
 		}
 
 		public ImmutableList<T> InsertRange (int index, IEnumerable<T> items)
@@ -186,11 +138,7 @@ namespace System.Collections.Immutable
 			var collection = items as ICollection<T>;
 			if (collection != null) 
 				return InsertCollection (index, collection);
-
-			var result = this;
-			foreach (T t in items)
-				result = result.Insert (index++, t);		
-			return result;
+			return InsertCollection (index, items.ToArray ());
 		}
 
 		IImmutableList<T> IImmutableList<T>.InsertRange (int index, IEnumerable<T> items)
@@ -250,18 +198,17 @@ namespace System.Collections.Immutable
 			if (count < 0)
 				throw new ArgumentOutOfRangeException ("count");
 
-			if ((uint) idx + (uint) count > (uint) this.count)
+			if ((uint) idx + (uint)count > (uint)items.Length)
 				throw new ArgumentException ("index and count exceed length of list");
 		}
 
 		public ImmutableList<T> RemoveRange (int index, int count)
 		{
 			CheckRange (index, count);
-			int capacity = Math.Max (Math.Max (items.Length * 2, DefaultCapacity), items.Length);
-			var newItems = new T[capacity];
+			var newItems = new T[items.Length - count];
 			Array.Copy (items, newItems, index);
-			Array.Copy (items, index + count, newItems, index, this.count - index - count);
-			return new ImmutableList<T> (newItems, this.count - count, valueComparer);
+			Array.Copy (items, index + count, newItems, index, this.items.Length - index - count);
+			return new ImmutableList<T> (newItems, valueComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.RemoveRange (int index, int count)
@@ -299,12 +246,12 @@ namespace System.Collections.Immutable
 
 		public ImmutableList<T> SetItem (int index, T value)
 		{
-			if (index > count)
+			if (index > items.Length)
 				throw new ArgumentOutOfRangeException ("index");
 
 			var newItems = GrowIfNeeded (0);
 			newItems [index] = value;
-			return new ImmutableList<T> (newItems, count, valueComparer);
+			return new ImmutableList<T> (newItems, valueComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.SetItem (int index, T value)
@@ -314,7 +261,7 @@ namespace System.Collections.Immutable
 
 		public ImmutableList<T> WithComparer (IEqualityComparer<T> equalityComparer)
 		{
-			return new ImmutableList<T> (items, count, equalityComparer);
+			return new ImmutableList<T> (items, equalityComparer);
 		}
 
 		IImmutableList<T> IImmutableList<T>.WithComparer (IEqualityComparer<T> equalityComparer)
@@ -333,8 +280,8 @@ namespace System.Collections.Immutable
 
 		public IEnumerator<T> GetEnumerator ()
 		{
-			for (int i = 0; i < count; i++) {
-				yield return items [i];
+			foreach (var item in items) {
+				yield return item;
 			}
 		}
 
@@ -353,7 +300,7 @@ namespace System.Collections.Immutable
 
 		public T this [int index] {
 			get {
-				if (index >= count)
+				if (index >= items.Length)
 					throw new ArgumentOutOfRangeException ("index");
 				return items [index];
 			}
@@ -365,7 +312,7 @@ namespace System.Collections.Immutable
 
 		public int Count {
 			get {
-				return count;
+				return items.Length;
 			}
 		}
 
@@ -381,7 +328,7 @@ namespace System.Collections.Immutable
 
 		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer, params T[] items)
 		{
-			return new ImmutableList<T> (items, items.Length, equalityComparer);
+			return new ImmutableList<T> (items, equalityComparer);
 		}
 
 		public static ImmutableList<T> Create<T> (params T[] items)
@@ -401,7 +348,7 @@ namespace System.Collections.Immutable
 		
 		public static ImmutableList<T> Create<T> (IEqualityComparer<T> equalityComparer, T item)
 		{
-			return new ImmutableList<T> (new T[] { item, default(T), default(T), default(T) }, 1, equalityComparer);;
+			return new ImmutableList<T> (new T[] { item }, equalityComparer);;
 		}
 
 		public static ImmutableList<T> Create<T> (T item)

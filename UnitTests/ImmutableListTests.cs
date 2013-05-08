@@ -135,7 +135,7 @@ namespace UnitTests
 		}
 
 		[Test]
-		public void TestFork()
+		public void TestFork2()
 		{
 			var immutableBase = ImmutableList.Create<int>(1);
 
