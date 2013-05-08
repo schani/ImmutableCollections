@@ -54,6 +54,21 @@ namespace UnitTests
 		}
 
 		[Test]
+		public void TestFork ()
+		{
+			var list = ImmutableList.Create<int> ();
+			list = list.Add (1);
+			var list2 = list.Add (2);
+			var list3 = list.Add (3);
+
+			Assert.AreEqual (1, list [0]);
+			Assert.AreEqual (1, list2 [0]);
+			Assert.AreEqual (1, list3 [0]);
+			Assert.AreEqual (2, list2 [1]);
+			Assert.AreEqual (3, list3 [1]);
+		}
+
+		[Test]
 		public void TestInsert ()
 		{
 			var list = ImmutableList.Create<int> ();
