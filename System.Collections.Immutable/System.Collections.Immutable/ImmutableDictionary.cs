@@ -249,15 +249,15 @@ namespace System.Collections.Immutable
 				if (this_d.IsEmpty) {
 					continue;
 				}
-				if (this_d.LTDict.IsEmpty) {
+				if (this_d.left.IsEmpty) {
 					//This is the next smallest value in the Dict:
 					yield return this_d.Value;
-					to_visit.Push (this_d.GTDict);
+					to_visit.Push (this_d.right);
 				} else {
 					//Break it up
-					to_visit.Push (this_d.GTDict);
+					to_visit.Push (this_d.right);
 					to_visit.Push (new AvlNode<KeyValuePair<TKey, TValue>> (this_d.Value));
-					to_visit.Push (this_d.LTDict);
+					to_visit.Push (this_d.left);
 				}
 			}
 		}

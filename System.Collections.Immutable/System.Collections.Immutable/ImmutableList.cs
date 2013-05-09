@@ -33,7 +33,7 @@ namespace System.Collections.Immutable
 	{
 		internal static readonly ImmutableList<T> Empty = new ImmutableList<T> ();
 
-		readonly IndexedAvlNode<T> root = IndexedAvlNode<T>.Empty;
+		readonly AvlNode<T> root = AvlNode<T>.Empty;
 		readonly IEqualityComparer<T> valueComparer;
 
 		internal ImmutableList ()
@@ -41,7 +41,7 @@ namespace System.Collections.Immutable
 			this.valueComparer = EqualityComparer<T>.Default;
 		}
 
-		internal ImmutableList (IndexedAvlNode<T> root, IEqualityComparer<T> equalityComparer)
+		internal ImmutableList (AvlNode<T> root, IEqualityComparer<T> equalityComparer)
 		{
 			this.root = root;
 			this.valueComparer = equalityComparer;

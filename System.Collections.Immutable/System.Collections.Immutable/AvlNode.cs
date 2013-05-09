@@ -32,7 +32,7 @@ namespace System.Collections.Immutable
 	{
 		public static readonly AvlNode<T> Empty = new NullNode ();
 
-		class NullNode : AvlNode<T>
+		sealed class NullNode : AvlNode<T>
 		{
 			public override bool IsEmpty {
 				get {
@@ -42,8 +42,8 @@ namespace System.Collections.Immutable
 		}
 
 		public readonly T Value;
-		internal readonly AvlNode<T> LTDict;
-		internal readonly AvlNode<T> GTDict;
+		internal readonly AvlNode<T> left;
+		internal readonly AvlNode<T> right;
 		readonly int _count;
 		readonly int _depth;
 
@@ -60,7 +60,7 @@ namespace System.Collections.Immutable
 				if (IsEmpty) {
 					return 0;
 				}
-				return LTDict._depth - GTDict._depth;
+				return left._depth - right._depth;
 			}
 		}
 
@@ -72,6 +72,8 @@ namespace System.Collections.Immutable
 
 		public AvlNode ()
 		{
+			right = Empty;
+			left = Empty;
 		}
 
 		public AvlNode (T val) : this(val, Empty, Empty)
@@ -81,30 +83,10 @@ namespace System.Collections.Immutable
 		AvlNode (T val, AvlNode<T> lt, AvlNode<T> gt)
 		{
 			Value = val;
-			LTDict = lt;
-			GTDict = gt;
-			_count = 1 + LTDict._count + GTDict._count;
-			_depth = 1 + Math.Max (LTDict._depth, GTDict._depth);
-		}
-
-		class MaxToMinEnumerable<T1> : IEnumerable, IEnumerable<T1> where T1 : IComparable<T1>
-		{
-			readonly AvlNode<T1> _dict;
-
-			public MaxToMinEnumerable (AvlNode<T1> dict)
-			{
-				_dict = dict;
-			}
-
-			public IEnumerator<T1> GetEnumerator ()
-			{
-				return _dict.GetMaxToMinEnumerator ();
-			}
-
-			IEnumerator IEnumerable.GetEnumerator ()
-			{
-				return _dict.GetMaxToMinEnumerator ();
-			}
+			left = lt;
+			right = gt;
+			_count = 1 + left._count + right._count;
+			_depth = 1 + Math.Max (left._depth, right._depth);
 		}
 
 		/// <summary>
@@ -115,10 +97,10 @@ namespace System.Collections.Immutable
 				if (IsEmpty)
 					return Empty;
 				var dict = this;
-				var next = dict.LTDict;
+				var next = dict.left;
 				while (next != Empty) {
 					dict = next;
-					next = dict.LTDict;
+					next = dict.left;
 				}
 				return dict;
 			}
@@ -136,30 +118,30 @@ namespace System.Collections.Immutable
 				return this;
 
 			if (bal == 2) {
-				if (LTDict.Balance == 1 || LTDict.Balance == 0) {
+				if (left.Balance == 1 || left.Balance == 0) {
 					//Easy case:
 					return this.RotateToGT ();
 				}
-				if (LTDict.Balance == -1) {
+				if (left.Balance == -1) {
 					//Rotate LTDict:
-					var newlt = LTDict.RotateToLT ();
-					var newroot = new AvlNode<T> (Value, newlt, GTDict);
+					var newlt = left.RotateToLT ();
+					var newroot = new AvlNode<T> (Value, newlt, right);
 					return newroot.RotateToGT ();
 				}
-				throw new Exception (String.Format ("LTDict too unbalanced: {0}", LTDict.Balance));
+				throw new Exception (String.Format ("LTDict too unbalanced: {0}", left.Balance));
 			}
 			if (bal == -2) {
-				if (GTDict.Balance == -1 || GTDict.Balance == 0) {
+				if (right.Balance == -1 || right.Balance == 0) {
 					//Easy case:
 					return this.RotateToLT ();
 				}
-				if (GTDict.Balance == 1) {
+				if (right.Balance == 1) {
 					//Rotate GTDict:
-					var newgt = GTDict.RotateToGT ();
-					var newroot = new AvlNode<T> (Value, LTDict, newgt);
+					var newgt = right.RotateToGT ();
+					var newroot = new AvlNode<T> (Value, left, newgt);
 					return newroot.RotateToLT ();
 				}
-				throw new Exception (String.Format ("LTDict too unbalanced: {0}", LTDict.Balance));
+				throw new Exception (String.Format ("LTDict too unbalanced: {0}", left.Balance));
 			}
 			//In this case we can show: |bal| > 2
 			//if( Math.Abs(bal) > 2 ) {
@@ -172,9 +154,9 @@ namespace System.Collections.Immutable
 			while (dict != Empty) {
 				int comp = comparer (dict.Value, value);
 				if (comp < 0) {
-					dict = dict.GTDict;
+					dict = dict.right;
 				} else if (comp > 0) {
-					dict = dict.LTDict;
+					dict = dict.left;
 				} else {
 					//Awesome:
 					return dict;
@@ -188,22 +170,45 @@ namespace System.Collections.Immutable
 		/// If the key is already present, it replaces the value
 		/// This operation is O(Log N) where N is the number of keys
 		/// </summary>
-		public AvlNode<T> InsertIntoNew (T val, Comparison<T> comparer)
+		public AvlNode<T> InsertIntoNew (int index, T val)
 		{
 			if (IsEmpty)
 				return new AvlNode<T> (val);
 
-			AvlNode<T> newlt = LTDict;
-			AvlNode<T> newgt = GTDict;
+			AvlNode<T> newlt = left;
+			AvlNode<T> newgt = right;
 
+			if (index <= left._count) {
+				newlt = left.InsertIntoNew (index, val);
+			} else {
+				newgt = right.InsertIntoNew (index - left._count - 1, val);
+			}
+
+			var newroot = new AvlNode<T> (Value, newlt, newgt);
+			return newroot.FixRootBalance ();
+		}
+
+		/// <summary>
+		/// Return a new tree with the key-value pair inserted
+		/// If the key is already present, it replaces the value
+		/// This operation is O(Log N) where N is the number of keys
+		/// </summary>
+		public AvlNode<T> InsertIntoNew (T val, Comparison<T> comparer)
+		{
+			if (IsEmpty)
+				return new AvlNode<T> (val);
+			
+			AvlNode<T> newlt = left;
+			AvlNode<T> newgt = right;
+			
 			int comp = comparer (Value, val);
 			T newv = Value;
 			if (comp < 0) {
 				//Let the GTDict put it in:
-				newgt = GTDict.InsertIntoNew (val, comparer);
+				newgt = right.InsertIntoNew (val, comparer);
 			} else if (comp > 0) {
 				//Let the LTDict put it in:
-				newlt = LTDict.InsertIntoNew (val, comparer);
+				newlt = left.InsertIntoNew (val, comparer);
 			} else {
 				//Replace the current value:
 				newv = val;
@@ -212,29 +217,65 @@ namespace System.Collections.Immutable
 			return newroot.FixRootBalance ();
 		}
 
-		/// <summary>
-		/// Merge two Dictionaries into one.
-		/// </summary>
-		AvlNode<T> Merge (AvlNode<T> one, AvlNode<T> two, Comparison<T> comparer)
+		public AvlNode<T> SetItem (int index, T val)
 		{
-			if (two._count > one._count) {
-				//Swap them so the sub-merge is on the smaller:
-				var temp = two;
-				two = one;
-				one = temp;
+			AvlNode<T> newlt = left;
+			AvlNode<T> newgt = right;
+
+			if (index < left._count) {
+				newlt = left.SetItem (index, val);
+			} else if (index > left._count) {
+				newgt = right.SetItem (index - left._count - 1, val);
+			} else {
+				return new AvlNode<T> (val, newlt, newgt);
 			}
-			AvlNode<T> min;
-			/*
-			 * A nice recursive algorithm is just return Merge,
-			 * rather than loop, but I'm afraid O(N) recursions
-			 * will cause .Net to explode EVEN THOUGH IT IS TAIL
-			 * RECURSION!  (they should use tailcall).
-			 */
-			while (two._count > 0) {
-				two = two.RemoveMin (out min);
-				one = one.InsertIntoNew (min.Value, comparer);
+			return new AvlNode<T> (Value, newlt, newgt);
+		}
+
+		public AvlNode<T> GetNodeAt (int index)
+		{
+			if (index < left._count) 
+				return left.GetNodeAt (index);
+			if (index > left._count) 
+				return right.GetNodeAt (index - left._count - 1);
+			return this;
+		}
+
+		/// <summary>
+		/// Try to remove the key, and return the resulting Dict
+		/// if the key is not found, old_node is Empty, else old_node is the Dict
+		/// with matching Key
+		/// </summary>
+		public AvlNode<T> RemoveFromNew (int index, out AvlNode<T> old_node)
+		{
+			if (IsEmpty) {
+				old_node = Empty;
+				return Empty;
 			}
-			return one;
+
+			if (index < left._count) {
+				var newlt = left.RemoveFromNew (index, out old_node);
+				if (old_node.IsEmpty) {
+					//Not found, so nothing changed
+					return this;
+				}
+				var newroot = new AvlNode<T> (Value, newlt, right);
+				return newroot.FixRootBalance ();
+			}
+
+			if (index > left._count) {
+				var newgt = right.RemoveFromNew (index - left._count - 1, out old_node);
+				if (old_node.IsEmpty) {
+					//Not found, so nothing changed
+					return this;
+				}
+				var newroot = new AvlNode<T> (Value, left, newgt);
+				return newroot.FixRootBalance ();
+			}
+
+			//found it
+			old_node = this;
+			return RemoveRoot ();
 		}
 
 		/// <summary>
@@ -250,21 +291,21 @@ namespace System.Collections.Immutable
 			}
 			int comp = comparer (Value, val);
 			if (comp < 0) {
-				var newgt = GTDict.RemoveFromNew (val, comparer, out old_node);
+				var newgt = right.RemoveFromNew (val, comparer, out old_node);
 				if (old_node.IsEmpty) {
 					//Not found, so nothing changed
 					return this;
 				}
-				var newroot = new AvlNode<T> (Value, LTDict, newgt);
+				var newroot = new AvlNode<T> (Value, left, newgt);
 				return newroot.FixRootBalance ();
 			}
 			if (comp > 0) {
-				var newlt = LTDict.RemoveFromNew (val, comparer, out old_node);
+				var newlt = left.RemoveFromNew (val, comparer, out old_node);
 				if (old_node.IsEmpty) {
 					//Not found, so nothing changed
 					return this;
 				}
-				var newroot = new AvlNode<T> (Value, newlt, GTDict);
+				var newroot = new AvlNode<T> (Value, newlt, right);
 				return newroot.FixRootBalance ();
 			}
 			//found it
@@ -278,14 +319,14 @@ namespace System.Collections.Immutable
 				max = Empty;
 				return Empty;
 			}
-			if (GTDict.IsEmpty) {
+			if (right.IsEmpty) {
 				//We are the max:
 				max = this;
-				return LTDict;
+				return left;
 			} else {
 				//Go down:
-				var newgt = GTDict.RemoveMax (out max);
-				var newroot = new AvlNode<T> (Value, LTDict, newgt);
+				var newgt = right.RemoveMax (out max);
+				var newroot = new AvlNode<T> (Value, left, newgt);
 				return newroot.FixRootBalance ();
 			}
 		}
@@ -296,14 +337,14 @@ namespace System.Collections.Immutable
 				min = Empty;
 				return Empty;
 			}
-			if (LTDict.IsEmpty) {
+			if (left.IsEmpty) {
 				//We are the minimum:
 				min = this;
-				return GTDict;
+				return right;
 			}
 			//Go down:
-			var newlt = LTDict.RemoveMin (out min);
-			var newroot = new AvlNode<T> (Value, newlt, GTDict);
+			var newlt = left.RemoveMin (out min);
+			var newroot = new AvlNode<T> (Value, newlt, right);
 			return newroot.FixRootBalance ();
 		}
 
@@ -315,23 +356,23 @@ namespace System.Collections.Immutable
 			if (IsEmpty) {
 				return this;
 			}
-			if (LTDict.IsEmpty) {
-				return GTDict;
+			if (left.IsEmpty) {
+				return right;
 			}
-			if (GTDict.IsEmpty) {
-				return LTDict;
+			if (right.IsEmpty) {
+				return left;
 			}
 			//Neither are empty:
-			if (LTDict._count < GTDict._count) {
+			if (left._count < right._count) {
 				//LTDict has fewer, so promote from GTDict to minimize depth
 				AvlNode<T> min;
-				var newgt = GTDict.RemoveMin (out min);
-				var newroot = new AvlNode<T> (min.Value, LTDict, newgt);
+				var newgt = right.RemoveMin (out min);
+				var newroot = new AvlNode<T> (min.Value, left, newgt);
 				return newroot.FixRootBalance ();
 			} else {
 				AvlNode<T> max;
-				var newlt = LTDict.RemoveMax (out max);
-				var newroot = new AvlNode<T> (max.Value, newlt, GTDict);
+				var newlt = left.RemoveMax (out max);
+				var newroot = new AvlNode<T> (max.Value, newlt, right);
 				return newroot.FixRootBalance ();
 			}
 		}
@@ -342,13 +383,13 @@ namespace System.Collections.Immutable
 		/// </summary>
 		AvlNode<T> RotateToGT ()
 		{
-			if (LTDict.IsEmpty || IsEmpty) {
+			if (left.IsEmpty || IsEmpty) {
 				return this;
 			}
-			var gLT = LTDict.LTDict;
-			var gGT = LTDict.GTDict;
-			var newgt = new AvlNode<T> (Value, gGT, GTDict);
-			return new AvlNode<T> (LTDict.Value, gLT, newgt);
+			var gLT = left.left;
+			var gGT = left.right;
+			var newgt = new AvlNode<T> (Value, gGT, right);
+			return new AvlNode<T> (left.Value, gLT, newgt);
 		}
 
 		/// <summary>
@@ -357,13 +398,13 @@ namespace System.Collections.Immutable
 		/// </summary>
 		AvlNode<T> RotateToLT ()
 		{
-			if (GTDict.IsEmpty || IsEmpty) {
+			if (right.IsEmpty || IsEmpty) {
 				return this;
 			}
-			var gLT = GTDict.LTDict;
-			var gGT = GTDict.GTDict;
-			var newlt = new AvlNode<T> (Value, LTDict, gLT);
-			return new AvlNode<T> (GTDict.Value, newlt, gGT);
+			var gLT = right.left;
+			var gGT = right.right;
+			var newlt = new AvlNode<T> (Value, left, gLT);
+			return new AvlNode<T> (right.Value, newlt, gGT);
 		}
 
 		/// <summary>
@@ -378,15 +419,15 @@ namespace System.Collections.Immutable
 				if (this_d.IsEmpty) {
 					continue;
 				}
-				if (this_d.GTDict.IsEmpty) {
+				if (this_d.right.IsEmpty) {
 					//This is the next biggest value in the Dict:
 					yield return this_d.Value;
-					to_visit.Push (this_d.LTDict);
+					to_visit.Push (this_d.left);
 				} else {
 					//Break it up
-					to_visit.Push (this_d.LTDict);
+					to_visit.Push (this_d.left);
 					to_visit.Push (new AvlNode<T> (this_d.Value));
-					to_visit.Push (this_d.GTDict);
+					to_visit.Push (this_d.right);
 				}
 			}
 		}
