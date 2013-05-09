@@ -158,8 +158,7 @@ namespace System.Collections.Immutable
 			var result = this;
 			if (result.ContainsKey (key))
 				result = result.Remove (key);
-			result.Add (key, value);
-			return result;
+			return result.Add (key, value);
 		}
 
 		IImmutableDictionary<TKey, TValue> IImmutableDictionary<TKey, TValue>.SetItem (TKey key, TValue value)

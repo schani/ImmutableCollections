@@ -46,6 +46,14 @@ namespace UnitTests
 
 			Assert.AreEqual ("World", dict["Hello"]);
 			Assert.AreEqual ("Rocks", dict["Xamarin"]);
+
+			dict = dict.SetItem ("Hello", "Immutability");
+			Assert.AreEqual (2, dict.Count);
+			Assert.AreSame ("Immutability", dict["Hello"]);
+
+			dict = dict.SetItem ("Mutation", "Sucks");
+			Assert.AreEqual (3, dict.Count);
+			Assert.AreSame ("Sucks", dict["Mutation"]);
 		}
 	}
 }
