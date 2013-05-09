@@ -410,27 +410,45 @@ namespace System.Collections.Immutable
 		/// <summary>
 		/// Enumerate from largest to smallest key
 		/// </summary>
-		public IEnumerator<T> GetMaxToMinEnumerator ()
+		public IEnumerator<T> GetEnumerator (bool reverse)
 		{
 			var to_visit = new Stack<AvlNode<T>> ();
 			to_visit.Push (this);
 			while (to_visit.Count > 0) {
 				var this_d = to_visit.Pop ();
+			continue_without_pop:
 				if (this_d.IsEmpty) {
 					continue;
 				}
-				if (this_d.right.IsEmpty) {
-					//This is the next biggest value in the Dict:
-					yield return this_d.Value;
-					to_visit.Push (this_d.left);
+				if (reverse) {
+					if (this_d.right.IsEmpty) {
+						//This is the next biggest value in the Dict:
+						yield return this_d.Value;
+						this_d = this_d.left;
+						goto continue_without_pop;
+					} else {
+						//Break it up
+						to_visit.Push (this_d.left);
+						to_visit.Push (new AvlNode<T> (this_d.Value));
+						this_d = this_d.right;
+						goto continue_without_pop;
+					}
 				} else {
-					//Break it up
-					to_visit.Push (this_d.left);
-					to_visit.Push (new AvlNode<T> (this_d.Value));
-					to_visit.Push (this_d.right);
+					if (this_d.left.IsEmpty) {
+						//This is the next biggest value in the Dict:
+						yield return this_d.Value;
+						this_d = this_d.right;
+						goto continue_without_pop;
+					} else {
+						//Break it up
+						if (!this_d.right.IsEmpty)
+							to_visit.Push (this_d.right);
+						to_visit.Push (new AvlNode<T> (this_d.Value));
+						this_d = this_d.left;
+						goto continue_without_pop;
+					}
 				}
 			}
 		}
 	}
 }
-

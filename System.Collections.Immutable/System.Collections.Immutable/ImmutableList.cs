@@ -255,7 +255,7 @@ namespace System.Collections.Immutable
 
 		public IEnumerator<T> GetEnumerator ()
 		{
-			return root.GetMaxToMinEnumerator ();
+			return root.GetEnumerator (false);
 		}
 
 		#endregion

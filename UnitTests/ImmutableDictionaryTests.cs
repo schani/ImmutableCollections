@@ -54,6 +54,40 @@ namespace UnitTests
 			dict = dict.SetItem ("Mutation", "Sucks");
 			Assert.AreEqual (3, dict.Count);
 			Assert.AreSame ("Sucks", dict["Mutation"]);
+
+			var items = new string[] { "Hello", "Mutation", "Xamarin" };
+			int i = 0;
+			foreach (var kvp in dict) {
+				Assert.AreEqual (items [i], kvp.Key);
+				++i;
+			}
+		}
+
+		[Test]
+		public void TestLargeRandomInsert ()
+		{
+			const int N = 10000;
+			var indexes = new int [N];
+			for (int i = 0; i < N; ++i)
+				indexes [i] = i;
+
+			var dict = ImmutableDictionary.Create<int, int> ();
+
+			var rand = new Random (123);
+
+			for (int i = N; i > 0; --i) {
+				var ri = rand.Next (0, i);
+				var rv = indexes [ri];
+				indexes [ri] = indexes [i - 1];
+				dict = dict.Add (rv, -rv);
+			}
+
+			int j = 0;
+			foreach (var kvp in dict) {
+				Assert.AreEqual (j, kvp.Key);
+				Assert.AreEqual (-j, kvp.Value);
+				++j;
+			}
 		}
 	}
 }
