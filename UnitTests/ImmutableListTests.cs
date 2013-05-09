@@ -153,6 +153,33 @@ namespace UnitTests
 			Assert.AreEqual(fork2[0], 1);
 			Assert.AreEqual(fork2[1], 3);
 		}
+
+		[Test]
+		public void TestLargeRandomInsert ()
+		{
+			const int N = 10000;
+			var list = ImmutableList.Create<int> ();
+			var reflist = new List<int> ();
+			var rand = new Random (123);
+			int i;
+			for (i = 0; i < N; ++i) {
+				var r = rand.Next (0, i + 1);
+				list = list.Insert (r, i);
+				reflist.Insert (r, i);
+			}
+
+			Assert.AreEqual (N, list.Count);
+
+			// traverse by indexed access
+			for (i = 0; i < N; ++i)
+				Assert.AreEqual (reflist [i], list [i]);
+
+			// traverse by enumerator
+			i = 0;
+			foreach (var k in list) {
+				Assert.AreEqual (reflist [i], k);
+				++i;
+			}
+		}
 	}
 }
-
