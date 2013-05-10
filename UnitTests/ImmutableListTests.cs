@@ -153,6 +153,35 @@ namespace UnitTests
 			Assert.AreEqual(fork2[0], 1);
 			Assert.AreEqual(fork2[1], 3);
 		}
+
+		[Test]
+		public void TestEnumerator ()
+		{
+			var s = ImmutableList.Create<int>();
+
+			foreach (int x in s)
+				Assert.Fail ("#1" + x);
+
+			s = s.Add (1);
+
+			int i = 0;
+
+			foreach (int x in s) {
+				Assert.AreEqual  (0, i, "#2");
+				Assert.AreEqual  (1, x, "#3");
+				i ++;
+			}
+
+			for (i = 2; i < 100; i ++)
+				s = s.Add (i);
+
+			i = 1;
+
+			foreach (int x in s) {
+				Assert.AreEqual (i, x, "#4");
+				i ++;
+			}
+		}
 	}
 }
 

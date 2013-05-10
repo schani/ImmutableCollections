@@ -385,15 +385,15 @@ namespace System.Collections.Immutable
 				if (this_d.IsEmpty) {
 					continue;
 				}
-				if (this_d.right.IsEmpty) {
+				if (this_d.left.IsEmpty) {
 					//This is the next biggest value in the Dict:
 					yield return this_d.Value;
-					to_visit.Push (this_d.left);
+					to_visit.Push (this_d.right);
 				} else {
 					//Break it up
-					to_visit.Push (this_d.left);
-					to_visit.Push (new IndexedAvlNode<T> (this_d.Value));
 					to_visit.Push (this_d.right);
+					to_visit.Push (new IndexedAvlNode<T> (this_d.Value));
+					to_visit.Push (this_d.left);
 				}
 			}
 		}
