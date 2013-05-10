@@ -100,12 +100,12 @@ namespace System.Collections.Immutable
 
 			public IEnumerator<T1> GetEnumerator ()
 			{
-				return _dict.GetMaxToMinEnumerator ();
+				return _dict.GetMinToMaxEnumerator ();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator ()
 			{
-				return _dict.GetMaxToMinEnumerator ();
+				return _dict.GetMinToMaxEnumerator ();
 			}
 		}
 
@@ -373,10 +373,33 @@ namespace System.Collections.Immutable
 			return new IndexedAvlNode<T> (right.Value, newlt, gGT);
 		}
 
+		
 		/// <summary>
 		/// Enumerate from largest to smallest key
 		/// </summary>
 		public IEnumerator<T> GetMaxToMinEnumerator ()
+		{
+			var to_visit = new Stack<IndexedAvlNode<T>> ();
+			to_visit.Push (this);
+			while (to_visit.Count > 0) {
+				var this_d = to_visit.Pop ();
+				if (this_d.IsEmpty) {
+					continue;
+				}
+				if (this_d.right.IsEmpty) {
+					//This is the next biggest value in the Dict:
+					yield return this_d.Value;
+					to_visit.Push (this_d.left);
+				} else {
+					//Break it up
+					to_visit.Push (this_d.left);
+					to_visit.Push (new IndexedAvlNode<T> (this_d.Value));
+					to_visit.Push (this_d.right);
+				}
+			}
+		}
+
+		public IEnumerator<T> GetMinToMaxEnumerator ()
 		{
 			var to_visit = new Stack<IndexedAvlNode<T>> ();
 			to_visit.Push (this);

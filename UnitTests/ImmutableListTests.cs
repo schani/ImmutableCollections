@@ -182,6 +182,37 @@ namespace UnitTests
 				i ++;
 			}
 		}
+
+		[Test]
+		public void TestCopyTo ()
+		{
+			var list = ImmutableList.Create<int> ();
+
+			for (int i = 0 ; i <10;i++)
+				list = list.Add (i);
+
+			int[] array = new int[10];
+
+			list.CopyTo (3, array, 5, 5);
+
+			for (int i = 0 ; i < 5;i++)
+				Assert.AreEqual (list[i + 3], array[i + 5]);
+		}
+
+
+		[Test]
+		public void TestForeach ()
+		{
+			var list = ImmutableList.Create<int> ();
+
+			for (int i = 1 ; i <= 10;i++)
+				list = list.Add (i);
+
+			int sum = 0;
+			list.ForEach (i => sum += i);
+			Assert.AreEqual ((1 + 10) * 10 / 2, sum);
+		}
+
 	}
 }
 

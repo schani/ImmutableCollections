@@ -29,7 +29,7 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-	public class ImmutableList<T> : IImmutableList<T>
+	public class ImmutableList<T> : IImmutableList<T>, IList<T>, IList
 	{
 		internal static readonly ImmutableList<T> Empty = new ImmutableList<T> ();
 
@@ -47,7 +47,270 @@ namespace System.Collections.Immutable
 			this.valueComparer = equalityComparer;
 		}
 
-		#region IImmutableList implementation
+		public void CopyTo (int index, T[] array, int arrayIndex, int count)
+		{
+			if (array == null)
+				throw new ArgumentNullException ("array");
+			//TODO!!!
+			foreach (var item in this.Skip (index).Take (count)) {
+				array [arrayIndex++] = item;
+			}
+		}
+
+		public void CopyTo (T[] array, int arrayIndex)
+		{
+			CopyTo (0, array, 0, Count);
+		}
+
+		public void CopyTo (T[] array)
+		{
+			CopyTo (array, 0);
+		}
+
+		public bool Exists (Predicate<T> match)
+		{
+			if (match == null)
+				throw new ArgumentNullException ("match");
+			return this.Any (i => match(i));
+		}
+
+		public T Find (Predicate<T> match)
+		{
+			if (match == null)
+				throw new ArgumentNullException ("match");
+			return this.FirstOrDefault (i => match(i));
+		}
+
+//		public ImmutableList<T> FindAll (Predicate<T> match)
+//		{
+//			throw new NotImplementedException ();
+//		}
+//
+//		public int FindIndex (int startIndex, int count, Predicate<T> match)
+//		{
+//			throw new NotImplementedException ();
+//		}
+//
+//		public int FindIndex (Predicate<T> match)
+//		{
+//			if (match == null)
+//				throw new ArgumentNullException ("match");
+//			return FindIndex (0, Count, match);
+//		}
+//
+//		public int FindIndex (int startIndex, Predicate<T> match)
+//		{
+//			if (match == null)
+//				throw new ArgumentNullException ("match");
+//			return FindIndex (startIndex, Count - startIndex, match);
+//		}
+//
+		public T FindLast (Predicate<T> match)
+		{
+			if (match == null)
+				throw new ArgumentNullException ("match");
+			return this.LastOrDefault (i => match(i));
+		}
+
+//		public int FindLastIndex (Predicate<T> match)
+//		{
+//			if (match == null)
+//				throw new ArgumentNullException ("match");
+//			return FindLast (Count - 1, match);
+//		}
+//
+//		public int FindLastIndex (int startIndex, Predicate<T> match)
+//		{
+//			if (match == null)
+//				throw new ArgumentNullException ("match");
+//			return FindLast (startIndex, Count - startIndex, match);
+//		}
+//
+//		public int FindLastIndex (int startIndex, int count, Predicate<T> match)
+//		{
+//			if (match == null)
+//				throw new ArgumentNullException ("match");
+//			throw new NotImplementedException ();
+//		}
+//
+		public void ForEach (Action<T> action)
+		{
+			if (action == null)
+				throw new ArgumentNullException ("action");
+			foreach (var item in this) {
+				action (item);
+			}
+		}
+
+//		public ImmutableList<T> GetRange (int index, int count)
+//		{
+//			throw new NotImplementedException ();
+//		}
+//
+//		public int IndexOf (T value)
+//		{
+//		}
+//
+//		public int IndexOf (T item, int index)
+//		{
+//		}
+//
+//		public int IndexOf (T item, int index, int count)
+//		{
+//		}
+
+//		public int LastIndexOf (T item, int index)
+//		{
+//		}
+//		public int LastIndexOf (T item)
+//		{
+//		}
+//		public int LastIndexOf (T item, int index, int count)
+//		{
+//		}
+
+		#region IList implementation
+
+		int IList.Add (object value)
+		{
+			throw new NotSupportedException ();
+		}
+
+		void IList.Clear ()
+		{
+			throw new NotSupportedException ();
+		}
+
+		bool IList.Contains (object value)
+		{
+			return Contains ((T)value);
+		}
+
+		int IList.IndexOf (object value)
+		{
+			return IndexOf ((T)value);
+		}
+
+		void IList.Insert (int index, object value)
+		{
+			throw new NotSupportedException ();
+		}
+
+		void IList.Remove (object value)
+		{
+			throw new NotSupportedException ();
+		}
+
+		void IList.RemoveAt (int index)
+		{
+			throw new NotSupportedException ();
+		}
+
+		bool IList.IsFixedSize {
+			get {
+				return true;
+			}
+		}
+
+		object IList.this [int index] {
+			get {
+				return this [index];
+			}
+			set {
+				throw new NotSupportedException ();
+			}
+		}
+
+		bool IList.IsReadOnly {
+			get {
+				return true;
+			}
+		}
+		#endregion
+
+		#region ICollection implementation
+
+		void ICollection.CopyTo (Array array, int index)
+		{
+			foreach (var item in this)
+				array.SetValue (item, index++);
+		}
+
+		bool ICollection.IsSynchronized {
+			get {
+				throw new NotImplementedException ();
+			}
+		}
+
+		object ICollection.SyncRoot {
+			get {
+				throw new NotImplementedException ();
+			}
+		}
+
+		#endregion
+
+		#region IList<T> implementation
+		T IList<T>.this [int index] {
+			get {
+				return this [index];
+			}
+			set {
+				throw new NotSupportedException ();
+			}
+		}
+		void IList<T>.Insert (int index, T item)
+		{
+			throw new NotSupportedException ();
+		}
+
+		void IList<T>.RemoveAt (int index)
+		{
+			throw new NotSupportedException ();
+		}
+
+		#endregion
+
+		#region ICollection<T> implementation
+
+		void ICollection<T>.Add (T item)
+		{
+			throw new NotSupportedException ();
+		}
+
+		void ICollection<T>.Clear ()
+		{
+			throw new NotSupportedException ();
+		}
+
+		void ICollection<T>.CopyTo (T[] array, int arrayIndex)
+		{
+			CopyTo (array, arrayIndex);
+		}
+
+		bool ICollection<T>.Remove (T item)
+		{
+			throw new NotSupportedException ();
+		}
+
+		bool ICollection<T>.IsReadOnly {
+			get {
+				return true;
+			}
+		}
+
+		#endregion
+
+		#region IEnumerable implementation
+
+		IEnumerator IEnumerable.GetEnumerator ()
+		{
+			return this.GetEnumerator ();
+		}
+
+		#endregion
+
+		#region IImmutableList<T> implementation
 
 		public ImmutableList<T> Add (T value)
 		{
@@ -251,25 +514,16 @@ namespace System.Collections.Immutable
 		}
 		#endregion
 
-		#region IEnumerable implementation
+		#region IEnumerable<T> implementation
 
 		public IEnumerator<T> GetEnumerator ()
 		{
-			return root.GetMaxToMinEnumerator ();
+			return root.GetMinToMaxEnumerator ();
 		}
 
 		#endregion
 
-		#region IEnumerable implementation
-
-		IEnumerator IEnumerable.GetEnumerator ()
-		{
-			return GetEnumerator ();
-		}
-
-		#endregion
-
-		#region IReadOnlyList implementation
+		#region IReadOnlyList<T> implementation
 
 		public T this [int index] {
 			get {

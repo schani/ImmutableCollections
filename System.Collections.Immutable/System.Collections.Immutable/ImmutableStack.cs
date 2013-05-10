@@ -33,13 +33,6 @@ namespace System.Collections.Immutable
 	{
 		readonly T head;
 		readonly ImmutableStack<T> tail;
-		readonly int count;
-
-		public int Count {
-			get {
-				return count;
-			}
-		}
 
 		internal ImmutableStack ()
 		{
@@ -49,7 +42,6 @@ namespace System.Collections.Immutable
 		{
 			this.head = head;
 			this.tail = tail;
-			this.count = tail.Count + 1;
 		}
 
 		#region IImmutableStack implementation
